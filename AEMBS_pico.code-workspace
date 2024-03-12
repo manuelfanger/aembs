@@ -1,0 +1,35 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"blinky_rp_sdk.h": "c",
+			"mcuwait.h": "c",
+			"mcugpio.h": "c",
+			"checkbutton_rp_sdk.h": "c",
+			"platform.h": "c",
+			"leds.h": "c",
+			"mcuutility.h": "c",
+			"mcurtos.h": "c",
+			"buttons.h": "c",
+			"buttons_config.h": "c",
+			"debounce.h": "c",
+			"game.h": "c",
+			"mcussd1306.h": "c",
+			"mcugdisplayssd1306.h": "c",
+			"mcufontdisplay.h": "c",
+			"gamemodel.h": "c",
+			"mcufontcour08normal.h": "c",
+			"system_error": "c",
+			"array": "c",
+			"functional": "c",
+			"tuple": "c",
+			"type_traits": "c",
+			"utility": "c",
+			"screensaver.h": "c"
+		}
+	}
+}

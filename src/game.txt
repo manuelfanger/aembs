@@ -1,0 +1,141 @@
+#if CONFIG_USE_QUEUE
+static void gameTask(void *pv)
+{
+  bool centerButtonPressed;
+  Game_event_t event;
+  BaseType_t res;
+
+  uint8_t x = 25;
+  uint8_t y = 25;
+
+  bool x_outOfRange = false;
+  bool y_outOfRange = false;
+
+#if PL_CONFIG_USE_OLED_LCD
+  I2CBus_Lock();
+  McuSSD1306_Init();
+  McuGDisplaySSD1306_Init();
+  I2CBus_Unlock();
+
+  Game_New();
+
+  // Game_ShowScreen(GAME_SCREEN_RECTANGLES);
+  vTaskDelay(pdMS_TO_TICKS(2000));
+
+#if 0
+  DrawBox();
+  DrawText();
+  ShowTemperature(3.5f);
+  Game_ShowScreen(GAME_SCREEN_AEMBS);
+  vTaskDelay(pdMS_TO_TICKS(2000));
+  Game_ShowScreen(GAME_SCREEN_GRAPHICS);
+  vTaskDelay(pdMS_TO_TICKS(2000));
+  Game_ShowScreen(GAME_SCREEN_TEMPERATURE);
+  vTaskDelay(pdMS_TO_TICKS(2000));
+#endif
+#endif
+
+for(;;) {
+    res = xQueueReceive(gameEventQueue, &event, portMAX_DELAY);
+    centerButtonPressed = false; /* reset */
+    if (res==pdTRUE) { /* message received */
+      centerButtonPressed = event.button==BTN_NAV_CENTER && event.kind==MCUDBNC_EVENT_PRESSED;
+    }
+    if (centerButtonPressed) {
+#if LEDS_CONFIG_HAS_BLUE_LED
+      Leds_On(LEDS_BLUE);
+#elif LEDS_CONFIG_HAS_RED_LED
+      Leds_On(LEDS_RED);
+#endif
+      vTaskDelay(pdMS_TO_TICKS(50));
+#if LEDS_CONFIG_HAS_BLUE_LED
+      Leds_Off(LEDS_BLUE);
+#elif LEDS_CONFIG_HAS_RED_LED
+      Leds_Off(LEDS_RED);
+#endif
+    }
+    Leds_Neg(LEDS_GREEN);
+    Game_ShowScreen(GAME_SCREEN_GAMEPLAY);
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+
+#if 0
+  for (;;)
+  {
+    res = xQueueReceive(gameEventQueue, &event, portMAX_DELAY);
+    centerButtonPressed = false; /* reset */
+    if (res == pdTRUE)
+    { /* message received */
+      centerButtonPressed = event.button == BTN_NAV_CENTER && event.kind == MCUDBNC_EVENT_PRESSED;
+      switch (event.button)
+      {
+      case BTN_NAV_CENTER:
+        break;
+      case BTN_NAV_UP:
+        y += 5;
+        break;
+      case BTN_NAV_DOWN:
+        y -= 5;
+        break;
+      case BTN_NAV_LEFT:
+        x -= 5;
+        break;
+      case BTN_NAV_RIGHT:
+        x += 5;
+        break;
+      default:
+        break;
+      }
+      x_outOfRange = (x >= McuGDisplaySSD1306_GetWidth()-1 || x <= 0);
+      y_outOfRange = (y >= McuGDisplaySSD1306_GetHeight()-1 || y <= 0);
+      if (x_outOfRange || y_outOfRange) {
+        Leds_On(LEDS_RED);
+      }
+      else {
+        Leds_Off(LEDS_RED);
+      }
+      taskENTER_CRITICAL();
+      x_pos = x;
+      y_pos = y;
+      taskEXIT_CRITICAL();
+      Game_ShowScreen(GAME_SCREEN_GAME);
+    }
+    Leds_Neg(LEDS_GREEN);
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+#endif
+#else
+static void gameTask(void *pv)
+{
+  bool centerButtonPressed;
+
+  for (;;)
+  {
+    taskENTER_CRITICAL();
+    centerButtonPressed = GameEvent.validEvent && GameEvent.button == BTN_NAV_CENTER && GameEvent.kind == MCUDBNC_EVENT_PRESSED;
+    if (GameEvent.validEvent)
+    {
+      GameEvent.validEvent = false; /* reset */
+    }
+    taskEXIT_CRITICAL();
+    if (centerButtonPressed)
+    {
+#if LEDS_CONFIG_HAS_BLUE_LED
+      Leds_On(LEDS_BLUE);
+#elif LEDS_CONFIG_HAS_RED_LED
+      Leds_On(LEDS_RED);
+#endif
+      vTaskDelay(pdMS_TO_TICKS(50));
+#if LEDS_CONFIG_HAS_BLUE_LED
+      Leds_Off(LEDS_BLUE);
+#elif LEDS_CONFIG_HAS_RED_LED
+      Leds_Off(LEDS_RED);
+#endif
+    }
+    Leds_Neg(LEDS_GREEN);
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+#endif
